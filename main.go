@@ -1,7 +1,14 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+)
 
 func main() {
-	fmt.Println("eq")
+	hash, _ := getHash("./files/file0")
+	fmt.Println(hash)
+
+	duplication, err := Duplicates("/home/alban/Desktop/")
+	fmt.Println(err)
+	fmt.Println(duplication)
 }
