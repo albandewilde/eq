@@ -108,6 +108,13 @@ func TestEqWithMissingFile(t *testing.T) {
 
 	for _, c := range cases {
 		isEq, err := Eq(c.f0, c.f1)
+		if err == nil {
+			t.Errorf(
+				"No error returned, expected: %s",
+				c.err,
+			)
+			return
+		}
 		if err.Error() != c.err {
 			t.Errorf(
 				"The wrong error has been raised, expected `%s` but got `%s`",
