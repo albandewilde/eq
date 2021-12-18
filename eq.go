@@ -23,7 +23,7 @@ func Eq(f0Path, f1Path string) (bool, error) {
 	return hash0 == hash1, nil
 }
 
-// Diplicates return a slice of slice of equal files in a directory
+// Duplicates return a slice of slice of equal files in a directory
 func Duplicates(dirPath string) ([][]string, error) {
 	files, err := ioutil.ReadDir(dirPath)
 	if err != nil {
