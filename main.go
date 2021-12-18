@@ -6,13 +6,14 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 )
 
 const (
-	// DLDIR is the directory to download images before checking if we already got it
-	DLDIR = "./dl/"
-	// IMGDIR is the directory where images are saved
-	IMGDIR = "./img/"
+	// SRCDIR is the directory to download images before checking if we already got it
+	SRCDIR = "./dl/"
+	// DTSDIR is the directory where images are saved
+	DSTDIR = "./img/"
 )
 
 var (
@@ -28,7 +29,11 @@ func init() {
 }
 
 func main() {
-	bot, err := NewBot(TKN, DLDIR)
+	// Start a goroutine that watch files in the `SRCDIR` then put them in the `DSTDIR` if there not already present
+	go WatchFiles(SRCDIR, DSTDIR, time.Second*3)
+
+	// Start a discord bot that download files in the `SRCDIR`
+	bot, err := NewBot(TKN, SRCDIR)
 	if err != nil {
 		log.Fatal(err)
 	}

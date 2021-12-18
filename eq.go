@@ -5,8 +5,10 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"log"
 	"os"
 	"path/filepath"
+	"time"
 )
 
 // Eq return true if the two file path are equals, false otherwise and return an error if it can't read the file
@@ -113,4 +115,41 @@ func getHash(filePath string) (string, error) {
 	}
 
 	return fmt.Sprintf("%x", h.Sum(nil)), nil
+}
+
+// WatchFiles in the `srcdir` then move them in the `dstdir` if it doesn't exist
+// Wait `duration` between each scan
+func WatchFiles(srcdir, dstdir string, duration time.Duration) {
+	for {
+		// List files in the `srcdir`
+		sourceFiles, err := ioutil.ReadDir(srcdir)
+		if err != nil {
+			log.Println(err)
+		}
+
+		// Check all files
+		for _, f := range sourceFiles {
+			fPath := filepath.Join(srcdir, f.Name())
+			sameFiles, err := FindSame(dstdir, fPath)
+			if err != nil {
+				log.Println(err)
+			}
+			// The file already exist
+			if len(sameFiles) != 0 {
+				err := os.Remove(fPath)
+				if err != nil {
+					log.Println(err)
+				}
+				continue
+			}
+
+			// Move the file in the `dstdir`
+			err = os.Rename(fPath, filepath.Join(dstdir, f.Name()))
+			if err != nil {
+				log.Println(err)
+			}
+		}
+
+		time.Sleep(duration)
+	}
 }
