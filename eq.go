@@ -144,9 +144,16 @@ func WatchFiles(srcdir, dstdir string, duration time.Duration) {
 			}
 
 			// Move the file in the `dstdir`
-			err = os.Rename(fPath, filepath.Join(dstdir, f.Name()))
+			// Don't use os.Rename becaust it cause an `invalid cross-device link` when renaming on differents partitions
+			file, err := os.ReadFile(fPath)
 			if err != nil {
 				log.Println(err)
+				continue
+			}
+			err = os.WriteFile(filepath.Join(dstdir, f.Name()), file, 0644)
+			if err != nil {
+				log.Println(err)
+				continue
 			}
 		}
 

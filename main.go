@@ -9,26 +9,44 @@ import (
 	"time"
 )
 
-const (
-	// SRCDIR is the directory to download images before checking if we already got it
-	SRCDIR = "./dl/"
-	// DTSDIR is the directory where images are saved
-	DSTDIR = "./img/"
-)
-
 var (
 	// TKN is the discord token
 	TKN string
+	// SRCDIR is the directory to download images before checking if we already got it
+	SRCDIR string
+	// DSTDIR is the directory where images are saved
+	DSTDIR string
 )
 
 func init() {
-	TKN = os.Getenv("tkn")
+	// Check if we have a discord token
+	TKN = os.Getenv("TKN")
 	if TKN == "" {
-		log.Fatal("No discord token provided in the environment variable `tkn`")
+		log.Fatal("No discord token provided in the environment variable `TKN`")
+	}
+
+	// Check if directories are given as environment variable
+	SRCDIR = os.Getenv("SRC_DIR")
+	if SRCDIR == "" {
+		log.Fatal("No source directory provided in the environment variable `SRC_DIR`")
+	}
+	DSTDIR = os.Getenv("DST_DIR")
+	if DSTDIR == "" {
+		log.Fatal("No destination directory provided in the environment variable `DST_DIR`")
 	}
 }
 
 func main() {
+	// Check if directories exist
+	_, err := os.Stat(SRCDIR)
+	if os.IsNotExist(err) {
+		log.Fatalf("Directory `%s` doesn't exist.", SRCDIR)
+	}
+	_, err = os.Stat(DSTDIR)
+	if os.IsNotExist(err) {
+		log.Fatalf("Directory `%s` doesn't exist.", DSTDIR)
+	}
+
 	// Start a goroutine that watch files in the `SRCDIR` then put them in the `DSTDIR` if there not already present
 	go WatchFiles(SRCDIR, DSTDIR, time.Second*3)
 
