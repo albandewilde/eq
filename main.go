@@ -48,7 +48,7 @@ func main() {
 	}
 
 	// Start a goroutine that watch files in the `SRCDIR` then put them in the `DSTDIR` if there not already present
-	go WatchFiles(SRCDIR, DSTDIR, time.Second*3)
+	go WatchFiles(SRCDIR, DSTDIR, time.Hour.Hours*3)
 
 	// Start a discord bot that download files in the `SRCDIR`
 	bot, err := NewBot(TKN, SRCDIR)
