@@ -1,10 +1,11 @@
 package main
 
 import (
-	"fmt"
+	"context"
 	"log"
 	"os"
 	"os/signal"
+	"strconv"
 	"syscall"
 	"time"
 )
@@ -12,10 +13,18 @@ import (
 var (
 	// TKN is the discord token
 	TKN string
+
 	// SRCDIR is the directory to download images before checking if we already got it
 	SRCDIR string
 	// DSTDIR is the directory where images are saved
 	DSTDIR string
+
+	// HOST is the host of the static server
+	HOST string
+	// PORT is the port where the static server listen
+	PORT int64
+	// BASEURL of the static server
+	BASEURL string
 )
 
 func init() {
@@ -33,6 +42,22 @@ func init() {
 	DSTDIR = os.Getenv("DST_DIR")
 	if DSTDIR == "" {
 		log.Fatal("No destination directory provided in the environment variable `DST_DIR`")
+	}
+
+	// Check if the port and host are given
+	HOST = os.Getenv("HOST")
+	if HOST == "" {
+		log.Fatal("No Host provided in the environment variable `HOST`")
+	}
+	port := os.Getenv("PORT")
+	var err error
+	PORT, err = strconv.ParseInt(port, 10, 64)
+	if err != nil {
+		log.Fatal(err)
+	}
+	BASEURL = os.Getenv("BASEURL")
+	if BASEURL == "" {
+		BASEURL = "/"
 	}
 }
 
@@ -55,18 +80,25 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-
 	err = bot.Open()
 	if err != nil {
 		log.Fatal(err)
 	}
+	log.Println("Bot is now running.  Press CTRL-C to exit.")
 
-	// Wait here until CTRL-C or other term signal is received.
-	fmt.Println("Bot is now running.  Press CTRL-C to exit.")
+	// Create the server to serve files in the `DSTDIR` directory
+	srv := CreateFileServer(HOST, PORT, BASEURL, DSTDIR)
+
+	// Gracefully close the discord bot and http server
 	sc := make(chan os.Signal, 1)
 	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt, os.Kill)
-	<-sc
+	go func() {
+		<-sc
+		bot.Close()
+		srv.Shutdown(context.Background())
+	}()
 
-	// Cleanly close down the Discord session.
-	bot.Close()
+	// Start static file server
+	log.Printf("Server running on %s:%d%s\n", HOST, PORT, BASEURL)
+	srv.ListenAndServe()
 }

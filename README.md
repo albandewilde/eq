@@ -16,6 +16,9 @@ If a file from the `SRC_DIR` is already present in the `DST_DIR` it's removed, o
 - `TKN` → The discord bot token
 - `SRC_DIR` → Directory where files are downloaded
 - `DST_DIR` → Directory where files are unique
+- `HOST` → Host where the server listen
+- `PORT` → Port the server listen on
+- `BASEURL` → Base URL of the static server
 
 ## Installation
 
