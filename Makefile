@@ -15,7 +15,7 @@ run: build
 
 test:
 	@chmod -r ./files/file5 # Assure we can't read file5
-	@tkn=$(TKN) SRC_DIR=$(SRC_DIR) DST_DIR=$(DST_DIR) go test ./...
+	@TKN=$(TKN) SRC_DIR=$(SRC_DIR) DST_DIR=$(DST_DIR) go test ./...
 	@chmod +r ./files/file5
 
 image: build
